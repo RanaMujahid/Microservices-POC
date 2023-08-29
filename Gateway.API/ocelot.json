@@ -1,0 +1,95 @@
+{
+  "GlobalConfiguration": {
+    "RequestIdKey": "OcRequestId",
+    "BaseUrl": "https://localhost:7069"
+  },
+  "JwtOptions": {
+    "Issuer": "PH",
+    "Audience": "AGNT",
+    "Secret": "ThisisTestSecret"
+  },
+  "BasicAuthOptions": {
+    "AuthBaseURL": "http://localhost:24638",
+    "AuthEndpoint": "/api/UserAuthApi/AuthenticateForBasicAuth"
+  },
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/gateway/product",
+      "UpstreamHttpMethod": [ "Get", "POST" ],
+      "DownstreamPathTemplate": "/api/productapi",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5249
+        }
+      ],
+      "HttpHandlerOptions": {
+        "UseTracing": true
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [ "10.65.4.72" ],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 10,
+        "Limit": 3
+      },
+      "FileCacheOptions": {
+        "TtlSeconds": 30,
+        "Region": "product"
+      },
+      "QosOptions": {
+        "TimeoutValue": 120000
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/product/updatename",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamPathTemplate": "/api/productapi/updatename",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product.mircroservice",
+          "Port": 80
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/product/getbyid/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/productapi/getbyid/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5249
+        }
+      ],
+      "HttpHandlerOptions": {
+        "UseTracing": true
+      },
+      "AddHeadersToRequest": {
+        "username": "Claims[uname] > value > |",
+        "clntapp": "Claims[aud] > value > |"
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "BasicAuthentication"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/customer",
+      "UpstreamHttpMethod": [ "Get", "POST" ],
+      "DownstreamPathTemplate": "/api/customerapi",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "customer.microservice",
+          "Port": 80
+        }
+      ]
+    }
+  ]
+}

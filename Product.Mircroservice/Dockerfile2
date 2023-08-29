@@ -1,0 +1,36 @@
+# See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+# Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
+# For more information, please see https://aka.ms/containercompat
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2016 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["Product.Mircroservice/Product.Mircroservice.csproj", "Product.Mircroservice/"]
+COPY ["Product.DAL/Product.DAL.csproj", "Product.DAL/"]
+COPY ["Product.Domains/Product.Domains.csproj", "Product.Domains/"]
+RUN dotnet restore "Product.Mircroservice/Product.Mircroservice.csproj"
+COPY . .
+WORKDIR "/src/Product.Mircroservice"
+RUN dotnet build "Product.Mircroservice.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Product.Mircroservice.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Copy the certificate and key files into the container
+COPY Product.Mircroservice/cert.pem /app/cert.pem
+COPY Product.Mircroservice/key.pem /app/key.pem
+
+# Set the environment variables for the certificate and key file paths
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/app/cert.pem
+ENV ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/key.pem
+
+ENTRYPOINT ["dotnet", "Product.Mircroservice.dll"]

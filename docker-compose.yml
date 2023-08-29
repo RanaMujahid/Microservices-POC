@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  product.mircroservice:
+    image: ${DOCKER_REGISTRY-}productmircroservice
+    build:
+      context: .
+      dockerfile: Product.Mircroservice\Dockerfile
+
+  customer.microservice:
+    image: ${DOCKER_REGISTRY-}customermicroservice
+    build:
+      context: .
+      dockerfile: Customer.Microservice\Dockerfile
+
+
+  gateway.api:
+    image: ${DOCKER_REGISTRY-}gatewayapi
+    build:
+      context: .
+      dockerfile: Gateway.API\Dockerfile
